@@ -12,26 +12,32 @@ UCombatComponent::UCombatComponent()
 {
 	
 	PrimaryComponentTick.bCanEverTick = false;
-
+	
+	BaseWalkSpeed = 600.0f;
+	AimWalkSpeed = 450.0f;
 }
 
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	}
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
-	if (GetOwner()->HasAuthority())
+	
+	bAiming = bIsAiming;
+	ServerSetAiming(bIsAiming);
+	
+	if (Character)
 	{
-		bAiming = bIsAiming;
-	}
-	else
-	{
-		ServerSetAiming(bIsAiming);
-	}
+		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed:BaseWalkSpeed;
+	} 
+	
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
@@ -45,10 +51,13 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 {
-	if (GetOwner()->HasAuthority())
+	
+	bAiming = bIsAiming;
+	
+	if (Character)
 	{
-		bAiming = bIsAiming;
-	}
+		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed:BaseWalkSpeed;
+	} 
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
