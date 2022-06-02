@@ -34,6 +34,8 @@ private:
 	
 	UPROPERTY(BlueprintReadOnly,Category=Movement,meta = (AllowPrivateAccess = "true"))
 	bool bWeaponEquipped;
+
+	class AWeapon* EquieppedWeapon;
 	
 	UPROPERTY(BlueprintReadOnly,Category=Movement,meta = (AllowPrivateAccess = "true"))
 	bool bIsCrouched;
@@ -56,4 +58,6 @@ private:
 	float AO_Yaw;
 	UPROPERTY(BlueprintReadOnly,Category=Movement,meta = (AllowPrivateAccess = "true"))
 	float AO_Pich;
+	UPROPERTY(BlueprintReadOnly,Category=Movement,meta = (AllowPrivateAccess = "true"))
+	FTransform LeftHandTransform;
 };

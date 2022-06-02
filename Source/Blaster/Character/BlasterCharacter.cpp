@@ -186,7 +186,13 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 	}
 
-	AO_Pich = GetBaseAimRotation().Pitch; 
+	AO_Pich = GetBaseAimRotation().Pitch;
+	if (AO_Pich>90.0f&&!IsLocallyControlled())
+	{
+		FVector2D InRange(270,360.0f);
+		FVector2D OutRange(-90.0,0.0f);
+		AO_Pich = FMath::GetMappedRangeValueClamped(InRange,OutRange,AO_Pich);
+	}
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon *LastOverlappingWeapon)
@@ -237,4 +243,10 @@ bool ABlasterCharacter::IsWeaponEquipped()
 bool ABlasterCharacter::IsAiming()
 {
 	return (Combat&&Combat->bAiming); 
+}
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon()
+{
+	if (Combat == nullptr)return nullptr;
+	return Combat->EquippedWeapon;
 }
