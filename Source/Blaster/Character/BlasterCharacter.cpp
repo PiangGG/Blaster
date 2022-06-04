@@ -28,7 +28,7 @@ ABlasterCharacter::ABlasterCharacter()
 
 	//bUseControllerRotationPitch = false;
 	//bUseControllerRotationRoll = false;
-	bUseControllerRotationYaw = false;
+	bUseControllerRotationYaw = true;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -41,8 +41,12 @@ ABlasterCharacter::ABlasterCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore );
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore);
+	GetCharacterMovement()->RotationRate = FRotator(0.0f,0.0f,850.f);
 
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+	NetUpdateFrequency = 66.0f;
+	MinNetUpdateFrequency = 33.0f;
+	
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -67,7 +71,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("Turn",this, &ABlasterCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp",this, &ABlasterCharacter::LookUp);
 	
-	PlayerInputComponent->BindAction("Jump",IE_Pressed,this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump",IE_Pressed,this, &ABlasterCharacter::Jump);
 	PlayerInputComponent->BindAction("Equip",IE_Pressed,this, &ABlasterCharacter::EquipButtonPressed);
 	PlayerInputComponent->BindAction("Crouch",IE_Pressed,this, &ABlasterCharacter::CrouchButtonPressed);
 	PlayerInputComponent->BindAction("Aim",IE_Pressed,this, &ABlasterCharacter::AimButtonPressed);
@@ -179,6 +183,10 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation,StartingAimRotation);
 		AO_Yaw = DeltaAimRotation.Yaw;
 
+		if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
 		bUseControllerRotationYaw = false;
 
 		TurnInPlace(DeltaTime);
@@ -189,7 +197,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		AO_Yaw = 0.0f;
 		bUseControllerRotationYaw = true;
 
-		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		//TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	AO_Pich = GetBaseAimRotation().Pitch;
@@ -199,6 +207,19 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		FVector2D OutRange(-90.0,0.0f);
 		AO_Pich = FMath::GetMappedRangeValueClamped(InRange,OutRange,AO_Pich);
 	}
+}
+
+void ABlasterCharacter::Jump()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Super::Jump();
+	}
+
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon *LastOverlappingWeapon)
@@ -231,6 +252,17 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	else if(AO_Yaw<-90.0F)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+
+	if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+	{
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw,0.0f,DeltaTime,4.0f);
+		AO_Yaw = InterpAO_Yaw;
+		if (FMath::Abs(AO_Yaw)<15.0F)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = FRotator(0.0f,GetBaseAimRotation().Yaw,0.0f);
+		}
 	}
 }
 

@@ -33,6 +33,7 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 	void AimOffset(float DeltaTime);
+	virtual  void Jump() override;
 private:
 	UPROPERTY(VisibleAnywhere,Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -56,6 +57,7 @@ private:
 	void ServerEquipButtonPressed();
 	
 	float AO_Yaw;
+	float InterpAO_Yaw;
 	float AO_Pich;
 	FRotator StartingAimRotation;
 
