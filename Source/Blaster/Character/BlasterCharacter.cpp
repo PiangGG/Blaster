@@ -41,6 +41,8 @@ ABlasterCharacter::ABlasterCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore );
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore);
+
+	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -178,12 +180,16 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		AO_Yaw = DeltaAimRotation.Yaw;
 
 		bUseControllerRotationYaw = false;
+
+		TurnInPlace(DeltaTime);
 	}
 	if (Speed>0.0f||bIsInAir) //跑或者跳跃
 	{
 		StartingAimRotation = FRotator(0.0f,GetBaseAimRotation().Yaw,0.0f);
 		AO_Yaw = 0.0f;
 		bUseControllerRotationYaw = true;
+
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	AO_Pich = GetBaseAimRotation().Pitch;
@@ -213,6 +219,18 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	if (Combat)
 	{
 		Combat->EquipWeapon(OverlappingWeapon); 
+	}
+}
+
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	if (AO_Yaw>90.0F)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if(AO_Yaw<-90.0F)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
 }
 
