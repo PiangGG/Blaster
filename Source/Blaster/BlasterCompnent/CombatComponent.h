@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+#define TRACE_LENGTH 80000.0F
+
 class AWeapon;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLASTER_API UCombatComponent : public UActorComponent
@@ -33,6 +35,15 @@ protected:
 	void OnRep_EquippedWeapon();
 
 	void FireButtonPresswed(bool bPressed);
+
+	UFUNCTION(Server,Reliable)
+	void ServerFire();
+
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastFire();
+
+	UFUNCTION()
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;

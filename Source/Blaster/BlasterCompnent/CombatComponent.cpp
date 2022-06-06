@@ -6,12 +6,13 @@
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 UCombatComponent::UCombatComponent()
 {
 	
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	
 	BaseWalkSpeed = 600.0f;
 	AimWalkSpeed = 450.0f;
@@ -52,10 +53,57 @@ void UCombatComponent::OnRep_EquippedWeapon()
 void UCombatComponent::FireButtonPresswed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
-	if (Character && bFireButtonPressed)
+	if (bFireButtonPressed)
 	{
-		Character->PlayFireMontage(bPressed);
+		ServerFire();
 	}
+	
+}
+
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	FVector2D ViewprotSize;
+	if (GEngine->GameViewport->GetGameViewport())
+	{
+		GEngine->GameViewport->GetViewportSize(ViewprotSize);
+	}
+	FVector2D CrosshairLocation(ViewprotSize.X / 2.0f,ViewprotSize.Y/2.0f);
+	FVector CrosshairLocationPosition;
+	FVector CrosshairLocationDirction;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this,0),CrosshairLocation,CrosshairLocationPosition,CrosshairLocationDirction);
+	
+	if (bScreenToWorld)
+	{
+		FVector Start = CrosshairLocationPosition;
+		
+		FVector End = Start + CrosshairLocationDirction*TRACE_LENGTH;
+		GetWorld()->LineTraceSingleByChannel(TraceHitResult,Start,End,ECollisionChannel::ECC_Visibility);
+
+		if (!TraceHitResult.bBlockingHit)
+		{
+			TraceHitResult.ImpactPoint = End;
+		}
+		else
+		{
+			DrawDebugSphere(GetWorld(),TraceHitResult.ImpactPoint,12.0,12,FColor::Red);
+		}
+	}
+}
+
+void UCombatComponent::MulticastFire_Implementation()
+{
+	if (EquippedWeapon==nullptr)return;
+	 
+	if (Character)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire();
+	}
+}
+
+void UCombatComponent::ServerFire_Implementation()
+{
+	MulticastFire();
 }
 
 void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
@@ -73,6 +121,8 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	FHitResult HitResult;
+	TraceUnderCrosshairs(HitResult);
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

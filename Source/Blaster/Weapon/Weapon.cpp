@@ -119,3 +119,11 @@ void AWeapon::ShowPickuoWidget(bool bShowWidget)
 	}
 }
 
+void AWeapon::Fire()
+{
+	if (FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation,false);
+	}
+}
+
