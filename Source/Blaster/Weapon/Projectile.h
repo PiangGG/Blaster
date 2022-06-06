@@ -19,6 +19,8 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly)
 	class UBoxComponent* CollisonBox;
+	UPROPERTY(VisibleAnywhere)
+	class UProjectileMovementComponent* ProjectileMovementComponent;
 public:	
 	virtual void Tick(float DeltaTime) override;
 
