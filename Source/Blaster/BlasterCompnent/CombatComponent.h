@@ -70,6 +70,21 @@ private:
 	float CrosshairInAirFactor;
 
 	FVector HitTarget;
+
+	/*
+	 * 瞄准的FOV
+	 */
+	float DefaultFOV;
+
+	UPROPERTY(EditAnywhere,Category = Combat)
+	float ZoomedFOV = 30.0f;
+
+	float CurrentFOV;
+	
+	UPROPERTY(EditAnywhere,Category = Combat)
+	float ZoomInterpSpeed = 20.0f;
+
+	void InterpFOV(float DeltaTime);
 public:	
 		
 };

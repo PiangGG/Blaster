@@ -38,6 +38,13 @@ public:
 	class UTexture2D* CrosshairsTop;
 	UPROPERTY(EditAnywhere)
 	class UTexture2D* CrosshairsBottom;
+	/*
+	 * 	Zoom Fov Aiing
+	 */
+	UPROPERTY(EditAnywhere)
+	float ZoomedFOV = 30.0F;
+	UPROPERTY(EditAnywhere)
+	float ZoomInterpSpeed = 20.0F;
 protected:
 	virtual void BeginPlay() override;
 
@@ -71,4 +78,6 @@ public:
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USphereComponent* GetAreaSphere()const {return AreaSphere;};
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh(){return WeaponMesh;}
+	FORCEINLINE float GetZoomedFOV()const{return ZoomedFOV;};
+	FORCEINLINE float GetZoomInterpSpeed()const{return ZoomInterpSpeed;};
 };
