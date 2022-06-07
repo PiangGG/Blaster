@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -36,12 +37,36 @@ void AProjectile::BeginPlay()
 	{
 		TracerComponent = UGameplayStatics::SpawnEmitterAttached(Tracer,CollisonBox,FName(),GetActorLocation(),GetActorRotation(),EAttachLocation::KeepWorldPosition);
 	}
+	if (HasAuthority())
+	{
+		CollisonBox->OnComponentHit.AddDynamic(this,&AProjectile::OnHit);
+	}
 }
 
+void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	
+	Destroy();
+}
 // Called every frame
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AProjectile::Destroyed()
+{
+
+	Super::Destroyed();
+	if (ImpactParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),ImpactParticles,GetActorTransform()); 
+	}
+	if (ImpactSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(this ,ImpactSound,GetActorLocation());
+	}
 }
 
