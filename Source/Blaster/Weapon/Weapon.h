@@ -27,6 +27,17 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps)const override;
 	void ShowPickuoWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
+
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* CrosshairsCenter;
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* CrosshairsLeft;
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* CrosshairsRight;
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* CrosshairsTop;
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* CrosshairsBottom;
 protected:
 	virtual void BeginPlay() override;
 

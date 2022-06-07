@@ -13,12 +13,24 @@ class BLASTER_API ACasing : public AActor
 	
 public:	
 	ACasing();
-private:
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* CasingMesh;
+
 protected:
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void TiseDestroyed();
+private:
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* CasingMesh;
+	
+	UPROPERTY(EditAnywhere)
+	float ShellEjectingImpulse;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ShellSound;
+
+	FTimerHandle TimerHandle_Destroy;
 public:	
 
 };

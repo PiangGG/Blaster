@@ -44,10 +44,13 @@ protected:
 
 	UFUNCTION()
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
+	void SetHUDCrosshairs(float  DeltaTime);
 private:
 	UPROPERTY()
 	class ABlasterCharacter* Character;
-	
+	class ABlasterPlayerController* Controller;
+	class ABlasterHUD * HUD;
 	UPROPERTY(ReplicatedUsing=OnRep_EquippedWeapon)
 	class AWeapon* EquippedWeapon;
 
