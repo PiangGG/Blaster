@@ -203,7 +203,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		{
 			InterpAO_Yaw = AO_Yaw;
 		}
-		bUseControllerRotationYaw = false;
+		bUseControllerRotationYaw = true;
 
 		TurnInPlace(DeltaTime);
 	}
@@ -212,8 +212,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		StartingAimRotation = FRotator(0.0f,GetBaseAimRotation().Yaw,0.0f);
 		AO_Yaw = 0.0f;
 		bUseControllerRotationYaw = true;
-
-		//TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	AO_Pich = GetBaseAimRotation().Pitch;
@@ -331,4 +330,10 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon()
 {
 	if (Combat == nullptr)return nullptr;
 	return Combat->EquippedWeapon;
+}
+
+FVector ABlasterCharacter::GetHitTarget() const
+{
+	if (Combat == nullptr)return FVector();
+	return Combat->HitTarget;
 }
