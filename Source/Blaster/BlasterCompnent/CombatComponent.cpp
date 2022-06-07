@@ -94,7 +94,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UCombatComponent::MulticastFire_Implementation()
 {
-	if (EquippedWeapon==nullptr)return;
+	if (EquippedWeapon==nullptr)return; 
 	 
 	if (Character)
 	{
