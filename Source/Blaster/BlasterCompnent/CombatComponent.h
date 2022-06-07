@@ -29,7 +29,7 @@ protected:
 
 	void SetAiming(bool bIsAiming);
 	UFUNCTION(Server,Reliable)
-	void ServerSetAiming(bool bIsAiming);
+	void  ServerSetAiming(bool bIsAiming);
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
@@ -37,10 +37,10 @@ protected:
 	void FireButtonPresswed(bool bPressed);
 
 	UFUNCTION(Server,Reliable)
-	void ServerFire();
+	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(NetMulticast,Reliable)
-	void MulticastFire();
+	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION()
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
@@ -61,7 +61,6 @@ private:
 
 	bool bFireButtonPressed;
 
-	FVector HitTarget;
 public:	
 		
 };
