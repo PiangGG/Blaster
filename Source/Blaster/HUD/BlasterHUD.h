@@ -19,6 +19,8 @@ public:
 	class UTexture2D* CrosshairsRight;
 	class UTexture2D* CrosshairsTop;
 	class UTexture2D* CrosshairsBottom;
+
+	float CrosshairSpread;
 	
 };
 UCLASS()
@@ -29,7 +31,10 @@ class BLASTER_API ABlasterHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
-	void DrawCrosshair(UTexture2D* Texture,FVector2D ViewportCenter);
+	void DrawCrosshair(UTexture2D* Texture,FVector2D ViewportCenter,FVector2D Spread);
+
+	UPROPERTY()
+	float CrosshairSpreadMax = 16.0f;
 private:
 	FHUDPackage HUDPackage;
 public:
