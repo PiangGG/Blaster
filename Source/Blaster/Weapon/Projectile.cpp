@@ -3,6 +3,7 @@
 
 #include "Projectile.h"
 
+#include "Blaster/Blaster.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -23,7 +24,7 @@ AProjectile::AProjectile()
 	CollisonBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisonBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility,ECollisionResponse::ECR_Block);
 	CollisonBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic,ECollisionResponse::ECR_Block);
-	CollisonBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn,ECollisionResponse::ECR_Block);
+	 CollisonBox->SetCollisionResponseToChannel(ECC_SkeletaMesh,ECollisionResponse::ECR_Block);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;

@@ -3,6 +3,7 @@
 
 #include "BlasterCharacter.h" 
 
+#include "Blaster/Blaster.h"
 #include "Blaster/BlasterCompnent/CombatComponent.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -40,6 +41,7 @@ ABlasterCharacter::ABlasterCharacter()
 	Combat->SetIsReplicated(true);
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore );
+	GetMesh()->SetCollisionObjectType(ECC_SkeletaMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility,ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.0f,0.0f,850.f);
