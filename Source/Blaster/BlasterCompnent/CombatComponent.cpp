@@ -21,6 +21,14 @@ UCombatComponent::UCombatComponent()
 	AimWalkSpeed = 450.0f;
 }
 
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent,EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent,bAiming);
+}
+
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -52,6 +60,79 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		InterpFOV(DeltaTime);
 	}
 	
+}
+
+void UCombatComponent::FireButtonPresswed(bool bPressed)
+{
+	bFireButtonPressed = bPressed;
+	if (bFireButtonPressed)
+	{
+		Fire();
+	}
+	
+}
+
+void UCombatComponent::Fire()
+{
+	if (bCanFire)
+	{
+		bCanFire = false;
+		ServerFire(HitTarget);
+		if (EquippedWeapon)
+		{
+			CrosshairShootingFactor = 0.75;
+		}
+		StartFireTimer();
+	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon==nullptr||Character==nullptr)return;
+	Character->GetWorldTimerManager().SetTimer(FireTimeer,this,&UCombatComponent::FireTimerFinished,EquippedWeapon->FireDelay);
+	
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon==nullptr)return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutoamtic)
+	{
+		Fire();
+	}
+}
+
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	MulticastFire(TraceHitTarget);
+}
+
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	if (EquippedWeapon==nullptr)return; 
+	 
+	if (Character)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TraceHitTarget );
+	}
+}
+
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (Character == nullptr || WeaponToEquip == nullptr)return;
+	 
+		
+	EquippedWeapon = WeaponToEquip;
+	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+
+	if (HandSocket)
+	{
+		HandSocket->AttachActor(EquippedWeapon,Character->GetMesh());
+	}
+	EquippedWeapon->SetOwner(Character);
 }
 
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
@@ -154,6 +235,19 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	
 }
 
+
+void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
+{
+	
+	bAiming = bIsAiming;
+	
+	if (Character)
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed:BaseWalkSpeed;
+	} 
+}
+
+
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon&&Character)
@@ -161,24 +255,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
-}
-
-void UCombatComponent::FireButtonPresswed(bool bPressed)
-{
-	bFireButtonPressed = bPressed;
-	if (bFireButtonPressed)
-	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		ServerFire(HitResult.ImpactPoint);
-
-		if (EquippedWeapon)
-		{
-			CrosshairShootingFactor+=0.75f;
-			CrosshairShootingFactor = FMath::Clamp(CrosshairShootingFactor,0,2.25);
-		}
-	}
-	
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -215,57 +291,3 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		}
 	}
 }
-
-void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	if (EquippedWeapon==nullptr)return; 
-	 
-	if (Character)
-	{
-		Character->PlayFireMontage(bAiming);
-		EquippedWeapon->Fire(TraceHitTarget );
-	}
-}
-
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	MulticastFire(TraceHitTarget);
-}
-
-void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
-{
-	
-	bAiming = bIsAiming;
-	
-	if (Character)
-	{
-		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed:BaseWalkSpeed;
-	} 
-}
-
-
-
-void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UCombatComponent,EquippedWeapon);
-	DOREPLIFETIME(UCombatComponent,bAiming);
-}
-
-void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if (Character == nullptr || WeaponToEquip == nullptr)return;
-	 
-		
-	EquippedWeapon = WeaponToEquip;
-	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-
-	if (HandSocket)
-	{
-		HandSocket->AttachActor(EquippedWeapon,Character->GetMesh());
-	}
-	EquippedWeapon->SetOwner(Character);
-}
-
