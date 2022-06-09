@@ -99,6 +99,16 @@ private:
 	float TimeSinceLastMovementReplication;	
 	float CalculateSpeed();
 	void CalculateAO_Pich();
+
+	/**
+	 *Player health 
+	 */
+	UPROPERTY(EditAnywhere,Category= "Player Stats")
+	float MaxHealth = 100.0f;
+	UPROPERTY(ReplicatedUsing = OnRep_Health,VisibleAnywhere,Category = "Player Stats")
+	float Health = 100.0f;
+	UFUNCTION()
+	void OnRep_Health();
 public:
 
 	void SetOverlappingWeapon(AWeapon* Weapon);
